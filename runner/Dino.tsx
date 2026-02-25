@@ -198,15 +198,10 @@ export const Dino = ({ size = "important" }: DinoProps) => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
-      if (["Space", "ArrowUp", "ArrowDown"].includes(e.code)) e.preventDefault();
-      if (gameStatus === "idle" && (e.code === "Space" || e.code === "ArrowUp")) {
-        startGame();
-        return;
+      if (["Space", "ArrowUp", "ArrowDown"].includes(e.code)) {
+        if (gameStatus === "running") e.preventDefault();
       }
-      if (gameStatus === "over" && (e.code === "Space" || e.code === "Enter")) {
-        restartGame();
-        return;
-      }
+      if (gameStatus !== "running") return;
       gameStateRef.current?.keysDown.add(e.code);
     };
 
@@ -220,7 +215,7 @@ export const Dino = ({ size = "important" }: DinoProps) => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [gameStatus, startGame, restartGame]);
+  }, [gameStatus]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent<HTMLCanvasElement>): void => {
@@ -247,10 +242,13 @@ export const Dino = ({ size = "important" }: DinoProps) => {
     }
   }, []);
 
-  const handleCanvasClick = useCallback((): void => {
+  const handleStartClick = useCallback((): void => {
     if (gameStatus === "idle") startGame();
-    else if (gameStatus === "over") restartGame();
-  }, [gameStatus, startGame, restartGame]);
+  }, [gameStatus, startGame]);
+
+  const handleRestartClick = useCallback((): void => {
+    if (gameStatus === "over") restartGame();
+  }, [gameStatus, restartGame]);
 
   // ── Game Loop ─────────────────────────────────
 
@@ -463,8 +461,51 @@ export const Dino = ({ size = "important" }: DinoProps) => {
             height={sc.canvasHeight}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
-            onClick={handleCanvasClick}
           />
+          {gameStatus === "idle" && (
+            <button
+              onClick={handleStartClick}
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                padding: "12px 24px",
+                fontSize: "16px",
+                fontWeight: "600",
+                backgroundColor: "#7B2FBE",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                zIndex: 10,
+              }}
+            >
+              Начать игру
+            </button>
+          )}
+          {gameStatus === "over" && (
+            <button
+              onClick={handleRestartClick}
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                padding: "12px 24px",
+                fontSize: "16px",
+                fontWeight: "600",
+                backgroundColor: "#7B2FBE",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                zIndex: 10,
+              }}
+            >
+              Рестарт
+            </button>
+          )}
         </CanvasCard>
 
         {sc.showControls && (

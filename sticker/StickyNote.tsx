@@ -98,6 +98,14 @@ export const StickyNote: FC<StickyNoteProps> = ({
   /* keyboard shortcuts */
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
+      // Only process keyboard shortcuts when editor is focused
+      if (editorRef.current && document.activeElement !== editorRef.current) {
+        return;
+      }
+
+      // Stop propagation for all keyboard events when focused
+      e.stopPropagation();
+
       (TOOLS.filter((t) => !isSep(t)) as ToolDef[]).forEach((t) => {
         if (t.key && e.ctrlKey && e.key.toLowerCase() === t.key) {
           e.preventDefault();
@@ -112,6 +120,24 @@ export const StickyNote: FC<StickyNoteProps> = ({
     },
     [exec, handleInput],
   );
+
+  /* Prevent keyboard events from propagating when editor is focused */
+  useEffect(() => {
+    const handleKeyDownGlobal = (e: KeyboardEvent): void => {
+      if (editorRef.current && document.activeElement === editorRef.current) {
+        // Prevent arrow keys, space, and other special keys from reaching other apps
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space", "Enter"].includes(e.code)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDownGlobal, true);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDownGlobal, true);
+    };
+  }, []);
 
   /* color cycling */
   const cycleColor = useCallback(() => {
