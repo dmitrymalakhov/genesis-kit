@@ -4,7 +4,7 @@ import React, {
   useRef,
   useCallback,
   type FC,
-  type KeyboardEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import {
   type StickyNoteProps,
@@ -97,7 +97,7 @@ export const StickyNote: FC<StickyNoteProps> = ({
 
   /* keyboard shortcuts */
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLDivElement>) => {
+    (e: ReactKeyboardEvent<HTMLDivElement>) => {
       // Only process keyboard shortcuts when editor is focused
       if (editorRef.current && document.activeElement !== editorRef.current) {
         return;
@@ -107,7 +107,7 @@ export const StickyNote: FC<StickyNoteProps> = ({
       e.stopPropagation();
 
       (TOOLS.filter((t) => !isSep(t)) as ToolDef[]).forEach((t) => {
-        if (t.key && e.ctrlKey && e.key.toLowerCase() === t.key) {
+        if (t.key && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === t.key) {
           e.preventDefault();
           exec(t.cmd, t.arg);
           handleInput();
@@ -116,6 +116,7 @@ export const StickyNote: FC<StickyNoteProps> = ({
       if (e.key === "Tab") {
         e.preventDefault();
         document.execCommand("insertText", false, "  ");
+        handleInput();
       }
     },
     [exec, handleInput],
@@ -160,7 +161,9 @@ export const StickyNote: FC<StickyNoteProps> = ({
       {/* ── Header ──────────────────────────────────── */}
       <Header $size={size}>
         <HeaderLeft>
-          <NoteIconWrap>{IconNote(size === "major" ? 17 : 15)}</NoteIconWrap>
+          <NoteIconWrap>
+            <IconNote size={size === "major" ? 17 : 15} />
+          </NoteIconWrap>
           <HeaderTitle $size={size}>заметка</HeaderTitle>
         </HeaderLeft>
         <HeaderRight>

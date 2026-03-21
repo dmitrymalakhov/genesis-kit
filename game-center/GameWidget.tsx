@@ -31,7 +31,7 @@ import {
   initP15, p15Click,
   SNK_SIZE, SNK_SPEEDS, initSnake, snakeTick, placeFood,
   TET_W, TET_H, initTetris, tetDrop, tetMove, tetRotateAction, tetHardDrop, tetValid,
-  RV_SZ, initReversi, rvValidMoves, rvApply, rvDoMove, rvCount, rvAI,
+  RV_SZ, initReversi, rvValidMoves, rvApply, rvDoMove, rvCount, rvAI, rvResolveTurn,
   PK_W, PK_H, PK_LEVELS, initPulsik, pkIsBlocked, pkGuardVision, pkTick, pkMove,
 } from "./engines";
 
@@ -216,7 +216,11 @@ export function GameWidget() {
     if (game !== "reversi" || rvSt.turn !== "w" || rvSt.gameOver || mode !== "ai") return;
     const t = setTimeout(() => {
       const mv = rvAI(rvSt);
-      if (mv) setRvSt((prev) => rvDoMove(prev, mv[0], mv[1]));
+      if (mv) {
+        setRvSt((prev) => rvDoMove(prev, mv[0], mv[1]));
+        return;
+      }
+      setRvSt((prev) => ({ ...prev, ...rvResolveTurn(prev.board, prev.turn) }));
     }, 400);
     return () => clearTimeout(t);
   }, [game, rvSt, mode]);
@@ -307,7 +311,7 @@ export function GameWidget() {
       </BoardModeRow>
 
       {/* Captured top (chess) */}
-      {game === "chess" && <CapturedRow>{capt.w.sort((a, b) => (PV[b.toUpperCase()] || 0) - (PV[a.toUpperCase()] || 0)).map((p, i) => <span key={i}>{PU[p]}</span>)}</CapturedRow>}
+      {game === "chess" && <CapturedRow>{[...capt.w].sort((a, b) => (PV[b.toUpperCase()] || 0) - (PV[a.toUpperCase()] || 0)).map((p, i) => <span key={i}>{PU[p]}</span>)}</CapturedRow>}
 
       {/* Board */}
       <BoardOuter>
@@ -349,7 +353,7 @@ export function GameWidget() {
       </BoardOuter>
 
       {/* Captured bottom (chess) */}
-      {game === "chess" && <CapturedRow>{capt.b.sort((a, b) => (PV[b.toUpperCase()] || 0) - (PV[a.toUpperCase()] || 0)).map((p, i) => <span key={i}>{PU[p]}</span>)}</CapturedRow>}
+      {game === "chess" && <CapturedRow>{[...capt.b].sort((a, b) => (PV[b.toUpperCase()] || 0) - (PV[a.toUpperCase()] || 0)).map((p, i) => <span key={i}>{PU[p]}</span>)}</CapturedRow>}
 
       {/* Corners legend */}
       {game === "corners" && (

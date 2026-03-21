@@ -46,8 +46,20 @@ export const DateWidget: FC<DateWidgetProps> = ({ className }) => {
   const [now, setNow] = useState<Date>(new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(timer);
+    const updateNow = () => setNow(new Date());
+    let minuteTimer: number | null = null;
+    const msUntilNextMinute =
+      (60 - new Date().getSeconds()) * 1000 - new Date().getMilliseconds();
+
+    const alignTimer = window.setTimeout(() => {
+      updateNow();
+      minuteTimer = window.setInterval(updateNow, 60_000);
+    }, msUntilNextMinute);
+
+    return () => {
+      window.clearTimeout(alignTimer);
+      if (minuteTimer !== null) window.clearInterval(minuteTimer);
+    };
   }, []);
 
   const day = now.getDate();

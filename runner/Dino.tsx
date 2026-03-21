@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type TouchEvent } from "react";
 import type { DinoProps, GameState, GameStatus, Obstacle, Particle } from "./types";
 import {
   SIZE_CONFIGS,
@@ -218,7 +218,7 @@ export const Dino = ({ size = "important" }: DinoProps) => {
   }, [gameStatus]);
 
   const handleTouchStart = useCallback(
-    (e: React.TouchEvent<HTMLCanvasElement>): void => {
+    (e: TouchEvent<HTMLCanvasElement>): void => {
       e.preventDefault();
       if (gameStatus === "idle") { startGame(); return; }
       if (gameStatus === "over") { restartGame(); return; }
