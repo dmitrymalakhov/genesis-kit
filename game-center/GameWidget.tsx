@@ -396,7 +396,7 @@ export function GameWidget() {
               })}
             </div>
           ))}
-        </div>
+        </MsGrid>
         {gameOver && <div style={{ marginTop: 8, textAlign: "center", fontSize: 14, fontWeight: 700, color: won ? COLORS.accent : COLORS.danger }}>{won ? "🎉 Все мины найдены!" : "💥 Мина!"}</div>}
         <div style={{ marginTop: 6, fontSize: 11, color: COLORS.muted }}>ЛКМ — открыть · ПКМ — флажок</div>
       </div>
@@ -447,11 +447,11 @@ export function GameWidget() {
         <BsStatsRow>
           <span>Ваши: {pA}/{bsSt.pShips.length}</span>
           <span>Потоплено: {eS}/{BSH.length}</span>
-        </div>
+        </BsStatsRow>
         <BsLayout>
           {renderBsGrid(bsSt.pGrid, null, false, "Ваше поле")}
           {renderBsGrid(bsSt.eView, bsClick, true, "Противник")}
-        </div>
+        </BsLayout>
         <div style={{ marginTop: 8, textAlign: "center", fontSize: 13, fontWeight: bsSt.gameOver ? 700 : 500, color: bsSt.gameOver ? (bsSt.winner === "player" ? COLORS.accent : COLORS.danger) : COLORS.txt2 }}>
           {bsSt.turn === "enemy" && !bsSt.gameOver ? <Spinner /> : sText}
         </div>
