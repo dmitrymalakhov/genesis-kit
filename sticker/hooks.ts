@@ -36,6 +36,12 @@ export const usePersistence = (storageKey: string): PersistenceResult => {
     }
   }, [key]);
 
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
   const loadHtml = useCallback((): string => {
     return initialRef.current?.html || "";
   }, []);

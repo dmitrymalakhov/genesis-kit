@@ -5,6 +5,14 @@ import { PHASES, TOTAL_CYCLES } from "./constants";
 export const useChime = (): (() => void) => {
   const ctx = useRef<AudioContext | null>(null);
 
+  useEffect(() => {
+    return () => {
+      ctx.current?.close().catch(() => {
+        /* noop */
+      });
+    };
+  }, []);
+
   const play = useCallback(() => {
     try {
       if (!ctx.current) {
@@ -13,6 +21,9 @@ export const useChime = (): (() => void) => {
         ctx.current = new AudioCtx();
       }
       const x = ctx.current;
+      if (x.state === "suspended") {
+        void x.resume();
+      }
       const osc = x.createOscillator();
       const gain = x.createGain();
       osc.connect(gain);

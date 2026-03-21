@@ -96,7 +96,7 @@ export function chessPseudo(st, r, c) {
   return mv;
 }
 
-export function chessDoMove(st, fr, fc, tr, tc, promo) {
+export function chessDoMove(st, fr, fc, tr, tc, promo = null) {
   const nb = st.board.map((r) => [...r]), piece = nb[fr][fc], t = piece.toUpperCase();
   let cast = st.castling, nep = "-", cap = nb[tr][tc], half = st.half + 1;
   if (t === "P" && pos(tr, tc) === st.ep) { nb[st.turn === "w" ? tr + 1 : tr - 1][tc] = null; cap = true; }
@@ -567,17 +567,22 @@ export function rvCount(board) {
   return { b, w };
 }
 
+export function rvResolveTurn(board, preferredTurn) {
+  const preferredMoves = rvValidMoves(board, preferredTurn);
+  if (preferredMoves.length > 0) return { turn: preferredTurn, gameOver: false, passed: false };
+
+  const fallbackTurn = preferredTurn === "b" ? "w" : "b";
+  const fallbackMoves = rvValidMoves(board, fallbackTurn);
+  if (fallbackMoves.length > 0) return { turn: fallbackTurn, gameOver: false, passed: true };
+
+  return { turn: preferredTurn, gameOver: true, passed: false };
+}
+
 export function rvDoMove(st, r, c) {
   const nb = rvApply(st.board, r, c, st.turn);
   if (!nb) return st;
   const nextTurn = st.turn === "b" ? "w" : "b";
-  const nextMoves = rvValidMoves(nb, nextTurn);
-  if (nextMoves.length > 0) return { board: nb, turn: nextTurn, gameOver: false, passed: false };
-  // Next player has no moves — check if current can play
-  const curMoves = rvValidMoves(nb, st.turn);
-  if (curMoves.length > 0) return { board: nb, turn: st.turn, gameOver: false, passed: true };
-  // Neither can play — game over
-  return { board: nb, turn: nextTurn, gameOver: true, passed: false };
+  return { board: nb, ...rvResolveTurn(nb, nextTurn) };
 }
 
 // Reversi AI — positional weights + mobility
